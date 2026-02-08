@@ -23,6 +23,23 @@ interface RetryOptions {
 function createRetryMiddleware(options: RetryOptions): Middleware;
 ```
 
+## 单次调用覆盖（Per-call Override）
+
+`@aptx/api-plugin-retry` 支持通过 `req.meta.__aptxRetry` 对单次调用覆盖重试行为（无需在运行时层重复实现重试逻辑）。
+
+```ts
+// 禁用本次调用重试
+meta: { __aptxRetry: { retries: 0 } }
+
+// 或显式 disable（优先级最高）
+meta: { __aptxRetry: { disable: true } }
+```
+
+规则：
+- override 只影响当前 `Request`。
+- 若同时配置了全局 `createRetryMiddleware({ retries })`，override 以 `req.meta.__aptxRetry` 为准。
+- 建议生成器封装一个 helper，例如 `retryMeta({ retries: 0 })`，避免业务直接写魔法字段。
+
 ### 参数说明
 
 - **retries**: 重试次数，`retries: 2` 表示总尝试次数 = 首次请求 + 2次重试 = 3次

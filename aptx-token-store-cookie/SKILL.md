@@ -24,6 +24,14 @@ const store = createCookieTokenStore({
 });
 ```
 
+## SSR / Node 环境说明
+
+`@aptx/token-store-cookie` 基于 `js-cookie`，属于浏览器实现，不适用于 SSR/Node。
+
+SSR 场景推荐：
+- 每个 SSR request 创建自己的 `TokenStore`（request-scoped），从入站 `Cookie` 读取 token，并通过 `Set-Cookie` 写回响应。
+- 可使用 `@aptx/token-store-ssr-cookie`（本仓库新增）作为 SSR cookie store。
+
 ## Implementation Workflow
 
 When integrating cookie token storage:

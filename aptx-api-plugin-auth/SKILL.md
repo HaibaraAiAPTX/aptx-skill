@@ -32,6 +32,7 @@ description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制
 
 - `@aptx/token-store`（TokenStore 接口定义）
 - `@aptx/token-store-cookie`（浏览器 cookie 实现）
+- SSR：`@aptx/token-store-ssr-cookie`（Node/SSR request-scoped cookie 实现）
 
 ---
 
