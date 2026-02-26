@@ -121,7 +121,7 @@ serializer.serialize({
   method: "POST",
   body: { name: "test" }
 }, ctx);
-// → { body: '{"name":"test"}', headers: { "Content-Type": "application/json" } }
+// → { body: '{"name":"test"}', headers: { "content-type": "application/json" } }
 
 // FormData
 serializer.serialize({
@@ -129,15 +129,16 @@ serializer.serialize({
   method: "POST",
   body: new FormData()
 }, ctx);
-// → { body: FormData, headers: {} }（Content-Type 由浏览器自动设置）
+// → { body: FormData, headers: { "content-type": null } }
+// content-type 设为 null，让 fetch 自动设置 boundary
 
-// string
+// Blob
 serializer.serialize({
-  url: "/text",
+  url: "/upload",
   method: "POST",
-  body: "hello"
+  body: new Blob(["data"])
 }, ctx);
-// → { body: "hello", headers: { "Content-Type": "text/plain;charset=UTF-8" } }
+// → { body: Blob, headers: { "content-type": null } }
 
 // null/undefined
 serializer.serialize({
@@ -145,25 +146,40 @@ serializer.serialize({
   method: "POST",
   body: null
 }, ctx);
-// → { body: null, headers: {} }
+// → { body: null }
 ```
 
 ### Content-Type 自动设置
 
-| body 类型 | Content-Type |
-|-----------|--------------|
-| object | `application/json` |
-| FormData | 不设置（浏览器自动设置） |
-| string | `text/plain;charset=UTF-8` |
-| Blob | `blob.type` |
-| ArrayBuffer/ArrayBufferView | `application/octet-stream` |
-| URLSearchParams | `application/x-www-form-urlencoded` |
+| body 类型 | serializer 返回的 headers | 说明 |
+|-----------|--------------------------|------|
+| `object`（普通对象） | `{ "content-type": "application/json" }` | 自动 JSON 序列化 |
+| `FormData` | `{ "content-type": null }` | 删除用户设置的 header，让 fetch 自动设置 boundary |
+| `Blob` | `{ "content-type": null }` | 让 fetch 使用 Blob.type 或自动处理 |
+| `ArrayBuffer` | `{ "content-type": null }` | 让 fetch 自动处理 |
+| `URLSearchParams` | `{ "content-type": null }` | 让 fetch 自动设置 |
+| `string` | `{ "content-type": null }` | 让 fetch 自动设置 |
+| `null`/`undefined` | 无 | 无 body |
+
+### Header 优先级机制
+
+Transport 层的 header 合并顺序：
+
+1. 先应用 `req.headers`（用户设置的 headers）
+2. 再应用 serializer 返回的 headers
+3. **serializer 有最终决定权**，可以用 `null` 删除用户错误设置的 header
+
+这意味着：
+- 如果用户错误地设置了 `Content-Type: multipart/form-data`（没有 boundary）
+- serializer 检测到 body 是 FormData，返回 `{ "content-type": null }`
+- 最终 Content-Type 会被删除，让 fetch 自动设置正确的 boundary
 
 ### 最佳实践
 
-1. ✅ 使用 FormData 上传文件
+1. ✅ 使用 FormData 上传文件，无需手动设置 Content-Type
 2. ✅ JSON 请求自动序列化，无需手动 JSON.stringify
-3. ❌ 不要手动设置 Content-Type（会被自动覆盖）
+3. ❌ 不要手动为 FormData/Blob 设置 Content-Type（会被自动删除）
+4. ✅ 如需自定义 Content-Type，在扩展 BodySerializer 时设置
 
 ---
 

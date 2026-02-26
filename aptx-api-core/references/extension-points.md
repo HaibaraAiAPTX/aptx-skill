@@ -286,7 +286,7 @@ client.apply(urlRewritePlugin([
 
 ```ts
 interface BodySerializer {
-  serialize(req: Request, ctx: Context): { body: any; headers?: HeadersInitLike };
+  serialize(req: Request, ctx: Context): { body: any; headers?: HeadersPatch };
 }
 ```
 
@@ -295,6 +295,74 @@ interface BodySerializer {
 - 支持 Protobuf、MsgPack 等格式
 - 文件上传优化
 - 自定义 Content-Type
+
+#### Header 优先级机制
+
+Serializer 返回的 headers **优先级高于** `req.headers`。Transport 层的合并顺序：
+
+1. 先应用 `req.headers`（用户设置的 headers）
+2. 再应用 serializer 返回的 headers
+3. serializer 可以用 `null` 值删除用户设置的 header
+
+| serializer 返回值 | 效果 |
+|------------------|------|
+| `{ "content-type": "application/json" }` | 设置/覆盖 Content-Type |
+| `{ "content-type": null }` | 删除用户设置的 Content-Type |
+| 不返回 headers | 保留用户设置的 headers |
+
+**为什么 FormData 需要删除 Content-Type？**
+
+FormData 请求需要 `Content-Type: multipart/form-data; boundary=----XXX` 格式，其中 `boundary` 是随机生成的分隔符。如果用户手动设置了 `Content-Type: multipart/form-data` 而没有 boundary，请求会失败。
+
+`DefaultBodySerializer` 检测到 FormData 时，返回 `{ "content-type": null }` 删除用户错误设置的 header，让 fetch 自动生成正确的 boundary。
+
+**示例：继承 DefaultBodySerializer 扩展**
+
+```ts
+import { DefaultBodySerializer, Request, Context } from "@aptx/api-core";
+
+class CustomBodySerializer extends DefaultBodySerializer {
+  serialize(req: Request, ctx: Context) {
+    // 特殊处理：自定义类型
+    if (req.body instanceof MyCustomType) {
+      return {
+        body: req.body.toBuffer(),
+        headers: { "content-type": "application/x-custom" },
+      };
+    }
+
+    // 其他类型复用默认逻辑（包括 FormData/Blob 的 header 删除机制）
+    return super.serialize(req, ctx);
+  }
+}
+
+// 使用
+const client = new RequestClient({
+  bodySerializer: new CustomBodySerializer(),
+});
+```
+
+**示例：强制删除某个 header**
+
+```ts
+import { DefaultBodySerializer, BodySerializer, Request, Context } from "@aptx/api-core";
+
+const serializer: BodySerializer = {
+  serialize(req: Request, ctx: Context) {
+    // 委托给默认实现
+    const result = new DefaultBodySerializer().serialize(req, ctx);
+
+    // 强制删除 Authorization（例如公开 API 场景）
+    return {
+      ...result,
+      headers: {
+        ...result.headers,
+        authorization: null,
+      },
+    };
+  },
+};
+```
 
 **示例：自定义日期序列化**
 
