@@ -33,6 +33,26 @@ meta: { __aptxRetry: { retries: 0 } }
 
 // 或显式 disable（优先级最高）
 meta: { __aptxRetry: { disable: true } }
+
+// 覆盖延迟策略
+meta: { __aptxRetry: { delayMs: 500 } }
+
+// 覆盖重试判定
+meta: { __aptxRetry: { retryOn: (error) => error.status >= 500 } }
+
+// 组合覆盖
+meta: { __aptxRetry: { retries: 3, delayMs: 200, retryOn: (error) => error.name === "NetworkError" } }
+```
+
+完整的 `__aptxRetry` 类型：
+
+```ts
+type RetryMetaOverride = {
+  disable?: boolean;     // 禁用重试（优先级最高）
+  retries?: number;     // 覆盖重试次数
+  delayMs?: number | ((attempt: number, error: Error, req: Request, ctx: Context) => number);  // 覆盖延迟策略
+  retryOn?: (error: Error, req: Request, ctx: Context) => boolean;  // 覆盖重试判定
+};
 ```
 
 规则：

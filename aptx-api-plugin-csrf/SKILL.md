@@ -123,7 +123,7 @@ const csrf = createCsrfMiddleware({
 - **SSR/Node 环境**必须提供 `getCookie` 函数，否则会报错 `document is not defined`
 - `getCookie` 返回原始 cookie 值，中间件会自动 `decodeURIComponent`，不要手动解码
 - 默认 `sameOriginOnly: true` 对大多数用例是安全的
-- Cookie 值会 URL 解码后再添加到 header
+- Cookie 值在读取时自动进行 URL 解码，然后添加到 header
 
 ---
 

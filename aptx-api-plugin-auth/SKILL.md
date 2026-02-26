@@ -43,13 +43,13 @@ description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制
 ```typescript
 interface TokenStore {
   // 获取存储的 token
-  getToken(): Promise<string | null>;
+  getToken(): string | undefined | Promise<string | undefined>;
 
-  // 存储 token（可选 expiresAt 用于支持过期时间）
-  setToken(token: string, expiresAt?: number): Promise<void>;
+  // 存储 token（可选 meta 用于支持过期时间和其他元数据）
+  setToken(token: string, meta?: { expiresAt?: number; [key: string]: unknown }): void | Promise<void>;
 
   // 清除 token
-  clearToken(): Promise<void>;
+  clearToken(): void | Promise<void>;
 }
 ```
 
@@ -68,8 +68,8 @@ import { createAuthMiddleware } from "@aptx/api-plugin-auth";
 import { createCookieTokenStore } from "@aptx/token-store-cookie";
 
 const store = createCookieTokenStore({
-  tokenKey: "token",
-  metaKey: "token_meta",
+  tokenKey: "aptx_token",
+  metaKey: "aptx_token_meta",
   syncExpiryFromMeta: true,
 });
 

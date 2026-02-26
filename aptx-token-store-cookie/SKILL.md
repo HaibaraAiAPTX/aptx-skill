@@ -13,8 +13,8 @@ Create store with default configuration:
 import { createCookieTokenStore } from "@aptx/token-store-cookie";
 
 const store = createCookieTokenStore({
-  tokenKey: "token",
-  metaKey: "token_meta",
+  tokenKey: "aptx_token",
+  metaKey: "aptx_token_meta",
   syncExpiryFromMeta: true,
   cookie: {
     path: "/",
@@ -23,6 +23,30 @@ const store = createCookieTokenStore({
   },
 });
 ```
+
+## 进阶：使用 CookieTokenStore 类
+
+除了 `createCookieTokenStore` 工厂函数，还可以直接使用 `CookieTokenStore` 类：
+
+```ts
+import { CookieTokenStore, CookieTokenStoreOptions } from "@aptx/token-store-cookie";
+
+const options: CookieTokenStoreOptions = {
+  tokenKey: "aptx_token",
+  metaKey: "aptx_token_meta",
+  syncExpiryFromMeta: true,
+  cookie: {
+    path: "/",
+    sameSite: "lax",
+    secure: true,
+  },
+};
+
+// 直接实例化
+const store = new CookieTokenStore(options);
+```
+
+适用于需要更多控制权的场景。
 
 ## SSR / Node 环境说明
 
