@@ -2,6 +2,68 @@
 
 本文档包含认证插件使用中可能遇到的边缘情况处理模式。
 
+## SSR 会话隔离
+
+SSR 环境下，不同用户的请求必须使用独立的 store 实例，避免 token 串用：
+
+### Next.js App Router
+
+```ts
+import { cookies } from "next/headers";
+import { createAuthMiddleware } from "@aptx/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+
+// ✅ 正确：使用异步工厂函数，每请求独立 store
+const auth = createAuthMiddleware({
+  store: async () => {
+    const cookieStore = await cookies();
+    return createSsrCookieTokenStore({
+      tokenKey: "aptx_token",
+      getCookieHeader: () => cookieStore.toString(),
+      setCookie: (v) => parseAndSetCookie(cookieStore, v),
+    });
+  },
+  refreshToken: async () => { /* ... */ },
+});
+
+// ❌ 错误：共享 store 实例会导致 token 串用
+const sharedStore = new SomeStore();
+const auth = createAuthMiddleware({
+  store: sharedStore, // 危险！所有请求共享同一个 store
+});
+```
+
+### Next.js Pages Router
+
+```ts
+import { createAuthMiddleware } from "@aptx/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+
+export function getServerSideProps(ctx) {
+  // 使用同步工厂函数，从请求上下文创建 store
+  const auth = createAuthMiddleware({
+    store: () => createSsrCookieTokenStore({
+      getCookieHeader: () => ctx.req.headers.cookie ?? "",
+      setCookie: (v) => ctx.res.setHeader("Set-Cookie", v),
+    }),
+    refreshToken: async () => { /* ... */ },
+  });
+
+  // ...
+}
+```
+
+### 并发请求隔离
+
+异步工厂函数确保并发请求各自独立：
+
+```ts
+// 用户 A 和用户 B 同时发起请求
+// 每个请求都会调用工厂函数，创建独立的 store 实例
+// 请求 A 的 store 只能读取用户 A 的 cookie
+// 请求 B 的 store 只能读取用户 B 的 cookie
+```
+
 ## 并发刷新防止
 
 中间件内部已实现防并发刷新机制，多个同时请求 401 时只会触发一次刷新：

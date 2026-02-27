@@ -38,7 +38,16 @@ description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制
 
 ## TokenStore 接口
 
-`store` 参数必须实现 `TokenStore` 接口（由 `@aptx/token-store` 提供）：
+`store` 参数支持三种形式（`TokenStoreResolver` 类型）：
+
+```typescript
+type TokenStoreResolver =
+  | TokenStore                    // 直接实例（向后兼容）
+  | (() => TokenStore)            // 同步工厂函数
+  | (() => Promise<TokenStore>);  // 异步工厂函数（SSR）
+```
+
+`TokenStore` 接口（由 `@aptx/token-store` 提供）：
 
 ```typescript
 interface TokenStore {
@@ -53,13 +62,24 @@ interface TokenStore {
 }
 ```
 
+### 使用场景
+
+| 形式 | 场景 | 说明 |
+|------|------|------|
+| 直接实例 | 浏览器端 | 单例模式，所有请求共享同一 store |
+| 同步工厂函数 | 浏览器端（推荐） | 保持 API 一致性 |
+| 异步工厂函数 | SSR 端 | 每请求独立 store，从请求上下文读取 cookie |
+
 推荐实现：
 - `@aptx/token-store-cookie` - 浏览器 cookie 存储（自动跨标签页同步）
+- `@aptx/token-store-ssr-cookie` - SSR cookie 存储（每请求独立）
 - 自定义实现（如 localStorage、sessionStorage、IndexedDB）
 
 ---
 
 ## 中间件模式（推荐）
+
+### 浏览器端
 
 最小模板：
 
@@ -74,13 +94,50 @@ const store = createCookieTokenStore({
 });
 
 const auth = createAuthMiddleware({
-  store,
+  store, // 或使用工厂函数: store: () => store
   refreshLeewayMs: 60_000,
   refreshToken: async () => {
     return { token: "new-token", expiresAt: Date.now() + 30 * 60 * 1000 };
   },
 });
 ```
+
+### SSR 端（Next.js App Router）
+
+SSR 环境需要为每个请求创建独立的 store，因为 cookie 需要从请求上下文读取：
+
+```ts
+import { cookies } from "next/headers";
+import { createAuthMiddleware } from "@aptx/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+
+// 创建请求级别的 API 客户端
+export async function createServerApiClient() {
+  const cookieStore = await cookies();
+
+  const auth = createAuthMiddleware({
+    // 异步工厂函数：每次请求创建独立 store
+    store: async () => createSsrCookieTokenStore({
+      tokenKey: "aptx_token",
+      metaKey: "aptx_token_meta",
+      getCookieHeader: () => cookieStore.toString(),
+      setCookie: (value) => {
+        // 解析 Set-Cookie 并调用 cookieStore.set()
+      },
+    }),
+    refreshToken: async () => {
+      // 服务端刷新逻辑
+    },
+  });
+
+  return createApiClient().use(auth);
+}
+```
+
+**关键点：**
+- 使用异步工厂函数 `async () => store`
+- 每次调用中间件都会执行工厂函数，获取该请求的 store 实例
+- 不同请求的 store 实例完全隔离，避免 token 串用
 
 ---
 
@@ -115,7 +172,7 @@ const validToken = await controller.ensureValidToken();
 
 | 选项 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
-| `store` | `TokenStore` | ✅ | - | Token 持久化抽象（必须实现 TokenStore 接口） |
+| `store` | `TokenStoreResolver` | ✅ | - | Token 持久化抽象（支持直接实例、同步工厂、异步工厂） |
 | `refreshToken` | `Promise<{token, expiresAt?} \| string>` | ✅ | - | 刷新 token 的异步函数 |
 | `refreshLeewayMs` | `number` | ❌ | `60_000` | 提前刷新的时间窗口（毫秒） |
 | `shouldRefresh` | `(error, req, ctx) => boolean` | ❌ | 401 检查 | 判断是否需要刷新的条件。error 结构：`{ status?: number, message?: string, code?: string }` |
