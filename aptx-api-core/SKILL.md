@@ -51,6 +51,8 @@ const res = await client.fetch("/user", {
 | 替换核心组件 | Plugin | [plugin-patterns.md](references/plugin-patterns.md) |
 | 中间件间共享状态 | Context Bag | [context-bag.md](references/context-bag.md) |
 | 自定义传输/解码器等 | Extension Points | [extension-points.md](references/extension-points.md) |
+| 错误拦截（HTTP 状态码） | Middleware try/catch | [middleware-patterns.md#9](references/middleware-patterns.md#9-全局错误处理-middleware) |
+| 错误拦截（业务逻辑） | Middleware 后置检查 | [middleware-patterns.md#8](references/middleware-patterns.md#8-业务错误拦截-middleware) |
 | 测试扩展 | Testing | [testing-guide.md](references/testing-guide.md) |
 | 查看默认实现 | Defaults | [defaults.md](references/defaults.md) |
 

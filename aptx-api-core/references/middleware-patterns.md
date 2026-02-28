@@ -10,6 +10,8 @@
   - [5. 请求签名 Middleware](#5-请求签名-middleware)
   - [6. 限流 Middleware](#6-限流-middleware)
   - [7. 请求去重 Middleware](#7-请求去重-middleware)
+  - [8. 业务错误拦截 Middleware](#8-业务错误拦截-middleware)
+  - [9. 全局错误处理 Middleware](#9-全局错误处理-middleware)
 - [执行顺序](#执行顺序)
 - [最佳实践](#最佳实践)
 
@@ -178,6 +180,139 @@ const dedupeMiddleware: Middleware = {
     });
   }
 };
+```
+
+### 8. 业务错误拦截 Middleware
+
+用于处理 HTTP 200 但业务逻辑失败的场景（如 `{ IsSuccess: false, Error: "..." }`）：
+
+```ts
+import { Response } from "@aptx/api-core";
+
+// 自定义业务错误类型
+class BusinessError extends Error {
+  constructor(
+    public message: string,
+    public code?: string | number,
+    public data?: unknown
+  ) {
+    super(message);
+    this.name = "BusinessError";
+  }
+}
+
+// 定义业务响应结构
+interface BusinessResponse<T = unknown> {
+  IsSuccess: boolean;
+  Error?: string;
+  Code?: string | number;
+  Data?: T;
+}
+
+const businessErrorMiddleware: Middleware = {
+  async handle(req, ctx, next) {
+    const res = await next(req, ctx);
+
+    // 检查业务响应结构
+    const data = res.data as BusinessResponse;
+
+    if (data && typeof data.IsSuccess === "boolean" && !data.IsSuccess) {
+      // 抛出业务错误，让上层统一处理
+      throw new BusinessError(
+        data.Error || "操作失败",
+        data.Code,
+        data.Data
+      );
+    }
+
+    return res;
+  }
+};
+
+// 使用
+client.use(businessErrorMiddleware);
+```
+
+**最佳实践**：
+- ✅ 在 middleware 中抛出错误，让调用方或全局错误处理器统一处理
+- ✅ 使用自定义错误类型区分业务错误和 HTTP 错误
+- ❌ 避免 middleware 直接调用 UI（toast/dialog），会导致耦合
+
+### 9. 全局错误处理 Middleware
+
+集中处理所有类型的错误并触发 UI 反馈：
+
+```ts
+import {
+  HttpError,
+  NetworkError,
+  TimeoutError,
+  CanceledError,
+} from "@aptx/api-core";
+
+// 假设有 UI 反馈函数
+declare function showErrorToast(message: string): void;
+declare function router: { push(path: string): void };
+
+const globalErrorHandlerMiddleware: Middleware = {
+  async handle(req, ctx, next) {
+    try {
+      return await next(req, ctx);
+    } catch (err) {
+      // 根据错误类型分发处理
+      if (err instanceof HttpError) {
+        switch (err.status) {
+          case 401:
+            // 未授权，跳转登录
+            router.push("/login");
+            break;
+          case 403:
+            showErrorToast("无权限访问");
+            break;
+          case 404:
+            showErrorToast("请求的资源不存在");
+            break;
+          case 500:
+          case 502:
+          case 503:
+            showErrorToast("服务器错误，请稍后重试");
+            break;
+          default:
+            showErrorToast(`请求失败: ${err.message}`);
+        }
+      } else if (err instanceof TimeoutError) {
+        showErrorToast("请求超时，请检查网络");
+      } else if (err instanceof NetworkError) {
+        showErrorToast("网络异常，请检查连接");
+      } else if (err instanceof CanceledError) {
+        // 用户取消，通常不需要提示
+        console.log("Request canceled:", req.url);
+      } else if (err instanceof BusinessError) {
+        // 业务错误
+        showErrorToast(err.message);
+      } else {
+        // 未知错误
+        showErrorToast("发生未知错误");
+      }
+
+      // 继续抛出，让调用方也能处理
+      throw err;
+    }
+  }
+};
+
+// 使用 - 建议作为第一个 middleware
+client.use(globalErrorHandlerMiddleware);
+```
+
+**执行顺序建议**：
+
+```ts
+// 错误处理 middleware 应该放在最外层（最先注册）
+client.use(globalErrorHandlerMiddleware);  // 第 1 个：捕获所有错误
+client.use(authMiddleware);                 // 第 2 个：认证
+client.use(businessErrorMiddleware);        // 第 3 个：业务错误检查
+// ... 其他 middleware
 ```
 
 ## 执行顺序
