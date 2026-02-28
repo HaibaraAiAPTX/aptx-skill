@@ -59,6 +59,14 @@ interface TokenStore {
 
   // 清除 token
   clearToken(): void | Promise<void>;
+
+  // --- 可选扩展方法 ---
+
+  // 获取元数据（用于读取 expiresAt）
+  getMeta?(): Promise<{ expiresAt?: number } | undefined>;
+
+  // 获取完整记录（token + meta）
+  getRecord?(): Promise<{ token: string; meta?: { expiresAt?: number } } | undefined>;
 }
 ```
 
@@ -104,7 +112,9 @@ const auth = createAuthMiddleware({
 
 ### SSR 端（Next.js App Router）
 
-SSR 环境需要为每个请求创建独立的 store，因为 cookie 需要从请求上下文读取：
+SSR 环境需要为每个请求创建独立的 store，因为 cookie 需要从请求上下文读取。
+
+**重要：服务端默认不处理 token 刷新**，刷新由客户端处理。
 
 ```ts
 import { cookies } from "next/headers";
@@ -125,9 +135,8 @@ export async function createServerApiClient() {
         // 解析 Set-Cookie 并调用 cookieStore.set()
       },
     }),
-    refreshToken: async () => {
-      // 服务端刷新逻辑
-    },
+    // 注意：服务端不需要 refreshToken，刷新由客户端处理
+    // refreshToken 会被忽略
   });
 
   return createApiClient().use(auth);
@@ -138,6 +147,7 @@ export async function createServerApiClient() {
 - 使用异步工厂函数 `async () => store`
 - 每次调用中间件都会执行工厂函数，获取该请求的 store 实例
 - 不同请求的 store 实例完全隔离，避免 token 串用
+- **服务端不处理刷新**：收到 401 直接抛出错误，由客户端处理跳转登录
 
 ---
 
@@ -173,13 +183,15 @@ const validToken = await controller.ensureValidToken();
 | 选项 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `store` | `TokenStoreResolver` | ✅ | - | Token 持久化抽象（支持直接实例、同步工厂、异步工厂） |
-| `refreshToken` | `Promise<{token, expiresAt?} \| string>` | ✅ | - | 刷新 token 的异步函数 |
+| `refreshToken` | `Promise<{token, expiresAt?} \| string>` | ✅ | - | 刷新 token 的异步函数（仅客户端生效） |
 | `refreshLeewayMs` | `number` | ❌ | `60_000` | 提前刷新的时间窗口（毫秒） |
-| `shouldRefresh` | `(error, req, ctx) => boolean` | ❌ | 401 检查 | 判断是否需要刷新的条件。error 结构：`{ status?: number, message?: string, code?: string }` |
-| `onRefreshFailed` | `(error) => void` | ❌ | - | 刷新失败回调 |
+| `shouldRefresh` | `(error, req, ctx) => boolean` | ❌ | 401 检查 | 判断是否需要刷新的条件（仅客户端生效） |
+| `onRefreshFailed` | `(error) => void` | ❌ | - | 刷新失败回调（仅客户端生效） |
 | `headerName` | `string` | ❌ | `"Authorization"` | 自定义 header 名称 |
 | `tokenPrefix` | `string` | ❌ | `"Bearer "` | Token 前缀 |
-| `maxRetry` | `number` | ❌ | `1` | 刷新失败后重试次数 |
+| `maxRetry` | `number` | ❌ | `1` | 刷新失败后重试次数（仅客户端生效） |
+
+**注意**：服务端（SSR）环境下，`refreshToken`、`shouldRefresh`、`onRefreshFailed`、`maxRetry` 会被忽略，因为服务端默认不处理 token 刷新。
 
 ### refreshToken 返回值
 
@@ -257,7 +269,7 @@ const auth = createAuthMiddleware({
     return await res.json();
   },
   onRefreshFailed: (error) => {
-    // 刷新失败后的业务动作
+    // 刷新失败后的业务动作（仅客户端执行）
     console.error("Auth refresh failed:", error);
     // 例如：跳转登录页、清除用户状态、显示登录弹窗
     window.location.href = "/login";
@@ -265,14 +277,23 @@ const auth = createAuthMiddleware({
 });
 ```
 
+**注意**：`onRefreshFailed` 仅在客户端执行。服务端收到 401 时会直接抛出错误，不调用此回调。
+
 ---
 
 ## 关键约束
 
 - `store` 必填且是唯一 token 持久化入口，必须实现 `TokenStore` 接口。
 - `refreshToken` 尽量返回 `expiresAt`，便于存储层处理过期时间。
-- 若刷新失败，必须由 `onRefreshFailed` 统一处理业务动作。
-- `shouldRefresh` 默认仅在 `HttpError(401)` 时触发刷新，其他错误不会刷新。
+- 若刷新失败，必须由 `onRefreshFailed` 统一处理业务动作（仅客户端生效）。
+- `shouldRefresh` 默认仅在 `HttpError(401)` 时触发刷新，其他错误不会刷新（仅客户端生效）。
+- **服务端默认不处理 token 刷新**：服务端收到 401 直接抛出错误，刷新由客户端处理。
+
+## 何时不使用
+
+- **静态 API 调用**：无需用户认证的公开接口不需要使用此插件
+- **服务端到服务端认证**：应使用 API Key 或应用级凭证，而非用户 token
+- **仅需一次性认证**：如果只需在应用启动时获取一次 token，无需自动刷新，可直接使用 `createAuthController` 而不挂载中间件
 
 ---
 

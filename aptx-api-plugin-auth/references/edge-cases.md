@@ -139,22 +139,46 @@ window.addEventListener("storage", (e) => {
 
 ## 无限刷新保护
 
-防止刷新失败导致的无限循环：
+框架已内置无限刷新保护机制，无需手动处理：
+
+1. **自动检测**：当刷新请求本身也返回 401 时，说明 token 已彻底失效，不再重试
+2. **防止并发刷新**：多个同时请求 401 时只会触发一次刷新
 
 ```ts
-const auth = createAuthMiddleware({
-  store,
-  refreshToken: async () => {
-    const res = await fetch("/api/refresh");
-    if (!res.ok) throw new Error("Refresh failed");
-    return await res.json();
-  },
-  shouldRefresh: (error, req, ctx) => {
-    // 避免在刷新请求本身失败时重试
-    if (req.url?.includes("/api/refresh")) {
-      return false;
-    }
-    return error.status === 401;
-  },
-});
+// 框架自动处理以下场景：
+// 1. 请求返回 401 → 尝试刷新
+// 2. 刷新请求也返回 401 → 抛出错误，不再重试
+// 3. 多个请求同时 401 → 只刷新一次
 ```
+
+## SSR 端行为
+
+服务端（SSR）默认不处理 token 刷新，原因：
+
+1. **全局变量问题**：Node.js 服务器长期运行，全局状态会串数据
+2. **Cookie 自动发送**：服务端 token 通过 cookie 自动发送，只需验证，不需要主动刷新
+3. **前端处理刷新**：如果 token 过期，前端收到 401 后自然跳转到登录页
+
+### 服务端行为
+
+| 场景 | 服务端行为 |
+|------|----------|
+| Token 有效 | 正常请求 |
+| Token 过期/无效 | 返回 401，不尝试刷新 |
+| onRefreshFailed | 不会触发（仅客户端） |
+
+```ts
+// 服务端收到 401 后的流程：
+// 1. 直接抛出 HttpError(401)
+// 2. 不调用 refreshToken
+// 3. 不调用 onRefreshFailed
+```
+
+### 客户端行为
+
+| 场景 | 客户端行为 |
+|------|----------|
+| Token 有效 | 正常请求 |
+| Token 过期 | 自动刷新 token 后重试 |
+| 刷新失败 | 调用 onRefreshFailed（跳转登录页等） |
+| 刷新请求也 401 | 抛出错误，不再重试 |
