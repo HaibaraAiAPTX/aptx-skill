@@ -137,18 +137,70 @@ window.addEventListener("storage", (e) => {
 });
 ```
 
-## 无限刷新保护
+## 无限刷新与死锁保护
 
-框架已内置无限刷新保护机制，无需手动处理：
+框架提供两层保护机制：
 
-1. **自动检测**：当刷新请求本身也返回 401 时，说明 token 已彻底失效，不再重试
-2. **防止并发刷新**：多个同时请求 401 时只会触发一次刷新
+### 1. 并发刷新防止（自动处理）
+
+多个请求同时返回 401 时，只触发一次刷新：
 
 ```ts
-// 框架自动处理以下场景：
-// 1. 请求返回 401 → 尝试刷新
-// 2. 刷新请求也返回 401 → 抛出错误，不再重试
-// 3. 多个请求同时 401 → 只刷新一次
+// 场景：3 个请求同时返回 401
+// 结果：只调用一次 refreshToken，所有请求等待刷新完成后重试
+```
+
+内部通过 `refreshPromise` 单例实现。
+
+### 2. 刷新请求死锁保护（需手动配置）
+
+**问题**：当 `refreshToken` 回调使用同一个 apiClient 时，如果刷新请求返回 401，会形成死锁：
+
+```
+1. 请求 A → 401
+2. auth 中间件调用 controller.refresh()
+3. refreshPromise 被创建
+4. refreshToken 请求 → 经过 auth 中间件 → 401
+5. auth 中间件再次调用 controller.refresh()
+6. 由于 refreshPromise 已存在，返回同一个 Promise（等待第3步完成）
+7. 第3步正在等待 refreshToken 请求的结果...
+8. 形成循环等待 → 死锁！
+```
+
+**解决方案**：使用 `SKIP_AUTH_REFRESH_META_KEY` 标记刷新请求：
+
+```ts
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+
+// ✅ 正确：刷新请求标记跳过 auth 刷新
+export function buildRefreshTokenSpec(): RequestSpec {
+  return {
+    method: "POST",
+    path: "/api/refresh-token",
+    meta: { [SKIP_AUTH_REFRESH_META_KEY]: true },
+  };
+}
+
+// 在 refreshToken 回调中使用
+const auth = createAuthMiddleware({
+  refreshToken: async () => {
+    // 这个请求如果返回 401，不会触发死锁
+    const response = await apiClient.execute(buildRefreshTokenSpec());
+    return { token: response.token, expiresAt: response.expiresAt };
+  },
+});
+```
+
+**原理**：auth 中间件检测到 `meta.skipAuthRefresh === true` 时，直接抛出 401 错误而不尝试刷新，打破循环等待。
+
+### 完整流程
+
+```
+正常流程：
+请求 → 401 → 刷新 token → 重试请求 → 成功
+
+刷新失败流程（已配置 skipAuthRefresh）：
+请求 → 401 → 刷新 token → 401 → 直接抛出错误 → onRefreshFailed → 跳转登录页
 ```
 
 ## SSR 端行为

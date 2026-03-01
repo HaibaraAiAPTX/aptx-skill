@@ -1,6 +1,6 @@
 ---
 name: aptx-api-plugin-auth
-description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制器。支持自动添加 Authorization header、token 刷新（主动/被动401处理）、防止重复刷新、失败回调。触发条件：用户请求认证功能（配置中间件、处理401刷新、管理token）或代码涉及 createAuthMiddleware/createAuthController 时使用。"
+description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制器。支持自动添加 Authorization header、token 刷新（主动/被动401处理）、防止重复刷新、死锁保护、失败回调。触发条件：用户请求认证功能（配置中间件、处理401刷新、管理token）或代码涉及 createAuthMiddleware/createAuthController/SKIP_AUTH_REFRESH_META_KEY 时使用。"
 ---
 
 # aptx-api-plugin-auth
@@ -256,6 +256,25 @@ const auth = createAuthMiddleware({
 
 刷新失败时会自动调用 `store.clearToken()` 清除本地 token。
 
+### 导出常量
+
+#### SKIP_AUTH_REFRESH_META_KEY
+
+用于标记请求跳过 auth 刷新逻辑，避免 refreshToken 请求本身返回 401 时触发死锁。
+
+```ts
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+
+// 在 refreshToken 请求的 spec 中添加此标记
+const refreshTokenSpec = {
+  method: "POST",
+  path: "/api/refresh-token",
+  meta: { [SKIP_AUTH_REFRESH_META_KEY]: true },
+};
+```
+
+**使用场景**：当 `refreshToken` 回调使用同一个 apiClient 发起刷新请求时，必须添加此标记。
+
 ---
 
 ## 错误处理
@@ -299,6 +318,33 @@ const auth = createAuthMiddleware({
 
 ## 高级主题
 
+### 刷新请求死锁保护
+
+**重要**：如果 `refreshToken` 回调使用同一个 apiClient 发起请求，必须使用 `SKIP_AUTH_REFRESH_META_KEY` 标记刷新请求。
+
+**问题场景**：
+```
+1. 请求 A → 401
+2. auth 中间件调用 refreshToken()
+3. refreshToken 请求经过 auth 中间件 → 401
+4. auth 中间件再次调用 refreshToken() → 死锁！
+```
+
+**解决方案**：
+
+```ts
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+
+// refreshToken 请求的 spec 必须添加跳过标记
+export function buildRefreshTokenSpec(): RequestSpec {
+  return {
+    method: "POST",
+    path: "/api/refresh-token",
+    meta: { [SKIP_AUTH_REFRESH_META_KEY]: true },  // 关键！
+  };
+}
+```
+
 ### 边缘情况处理
 
 详见 [edge-cases.md](references/edge-cases.md)，包含：
@@ -307,4 +353,4 @@ const auth = createAuthMiddleware({
 - Token 验证
 - 网络错误重试
 - 跨标签页 Token 同步
-- 无限刷新保护
+- 无限刷新与死锁保护
