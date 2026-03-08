@@ -1,6 +1,6 @@
 ---
 name: aptx-api-plugin-auth
-description: "使用 @aptx/api-plugin-auth 实现 token 认证中间件和控制器。支持自动添加 Authorization header、token 刷新（主动/被动401处理）、防止重复刷新、死锁保护、失败回调。触发条件：用户请求认证功能（配置中间件、处理401刷新、管理token）或代码涉及 createAuthMiddleware/createAuthController/SKIP_AUTH_REFRESH_META_KEY 时使用。"
+description: "处理用户认证和 token 管理时使用。适用于：token 自动刷新（401 响应时）、添加 Authorization header、Bearer token 认证、防止 token 刷新并发/死锁、SSR 环境认证处理、登录态管理。当用户提及 token 过期、401 错误、需要自动刷新 token、登录态失效、请求需要带认证信息时，即使未提及具体包名也应触发。"
 ---
 
 # aptx-api-plugin-auth

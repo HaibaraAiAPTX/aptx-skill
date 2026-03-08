@@ -1,6 +1,6 @@
 ---
 name: aptx-token-store
-description: "使用 @aptx/token-store 定义或实现 token 持久化。用于：实现 TokenStore 接口、支持同步/异步 API（getToken/setToken/clearToken）、可选的元数据方法、实现不同存储后端（cookie、localStorage、小程序、内存）、配合 @aptx/api-plugin-auth 使用。当代码需要实现自定义 TokenStore 时触发。"
+description: "实现 token 持久化存储时使用。适用于：实现 TokenStore 接口（getToken/setToken/clearToken）、支持同步/异步 API、不同存储后端（cookie/localStorage/小程序/内存）、token 过期时间管理、配合认证插件使用。当用户询问 token 存在哪里、如何持久化 token、自定义 token 存储后端、token 过期如何处理时应触发。"
 ---
 
 # aptx-token-store

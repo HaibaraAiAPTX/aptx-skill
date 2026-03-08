@@ -1,6 +1,6 @@
 ---
 name: aptx-api-plugin-csrf
-description: "使用 @aptx/api-plugin-csrf 添加 CSRF 保护。触发条件：当代码需要在请求中添加 CSRF token、配置 cookie/header 名称、处理 SSR/Node 环境的 cookie 读取、或使用 createCsrfMiddleware 时使用。"
+description: "添加 CSRF/XSRF 安全保护时使用。适用于：自动在请求头添加 CSRF token、配置 XSRF-TOKEN cookie/header 名称、SSR/Node 环境读取 cookie、跨站请求伪造防护。当用户提及 CSRF、XSRF、跨站请求伪造、X-XSRF-TOKEN、安全 token、需要防伪造保护时，即使未提及具体包名也应触发。"
 ---
 
 # aptx-api-plugin-csrf

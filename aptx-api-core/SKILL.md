@@ -1,6 +1,6 @@
 ---
 name: aptx-api-core
-description: "使用 @aptx/api-core 进行 HTTP 请求的指导。用于：创建和配置 RequestClient、实现 middleware/plugin、替换核心组件（Transport/Decoder 等）、处理错误、监听事件、使用 Context Bag、测试扩展。当代码需要理解或修改 @aptx/api-core 的架构、扩展机制、最佳实践时触发。"
+description: "创建、配置或扩展 HTTP 客户端时使用。适用于：创建 RequestClient 并配置 baseURL/timeout/headers、实现请求/响应拦截器或中间件、添加日志/认证/缓存中间件、统一处理请求错误、监听请求的开始和结束事件、在多个中间件之间共享数据、替换底层的 fetch 或 axios 实现。当用户需要封装 HTTP 请求工具类、实现请求拦截、处理请求超时或构建 API 客户端时，即使未提及具体包名也应触发。"
 ---
 
 # aptx-api-core

@@ -1,6 +1,6 @@
 ---
 name: aptx-token-store-cookie
-description: "Implement cookie-based token storage using @aptx/token-store-cookie. Use when code needs to store authentication tokens in browser cookies with: (1) Configurable token/meta cookie names, (2) Automatic expiresAt to cookie expires synchronization, (3) Cookie options (path/sameSite/secure), (4) createCookieTokenStore API integration"
+description: "在浏览器 cookie 中存储 token 时使用。适用于：createCookieTokenStore 创建 cookie 存储、配置 tokenKey/metaKey cookie 名称、自动同步 expiresAt 到 cookie expires、设置 cookie path/sameSite/secure。当用户需要在浏览器端持久化 token、cookie 存储认证信息时应触发。"
 ---
 
 # aptx-token-store-cookie

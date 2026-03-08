@@ -1,6 +1,6 @@
 ---
 name: aptx-hooks-usage
-description: "指导 LLM 正确使用 aptx 代码生成器生成的 React Query 和 Vue Query hooks。当 LLM 在项目中使用生成的 useXxxQuery 或 useXxxMutation hooks，需要修改传参（如添加 enabled、staleTime 等配置）时触发。"
+description: "使用代码生成的 React Query/Vue Query hooks 时使用。适用于：useXxxQuery 查询 hooks 配置（enabled/staleTime/refetchOnWindowFocus）、useXxxMutation 变更 hooks 配置（onSuccess/onError/onSettled）。关键：配置必须放在 query 或 mutation 命名空间内。当代码出现 useXxxQuery、useXxxMutation 模式的 hooks 且需要配置选项时应触发。"
 ---
 
 # Aptx Hooks Usage
