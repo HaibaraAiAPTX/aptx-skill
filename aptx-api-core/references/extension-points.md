@@ -186,6 +186,7 @@ interface UrlResolver {
 - 只要需求依赖“相对路径语义”来选择网关或 baseURL，就应放在 `UrlResolver`。
 - middleware 更适合处理 headers、签名、认证、缓存、重试等横切逻辑，不适合承担跨网关路由。
 - 需要多段 URL 决策时，优先组合 resolver，顺序由组合处显式定义。
+- gateway 配置中的 `baseURL` 必须是合法绝对 URL；若命中的 gateway `baseURL` 非法，core 会抛出 `ConfigError`，错误信息至少包含非法 `baseURL`，命中 gateway 时还会包含对应的 `prefix`。
 
 **示例：动态 baseURL**
 
@@ -251,6 +252,11 @@ const gatewayRoutingPlugin = (fallbackBaseURL: string): Plugin => ({
   },
 });
 ```
+
+**错误语义**：
+- 合法 gateway `baseURL`：正常进入默认 resolver，产出最终绝对 URL。
+- 非法 gateway `baseURL`：抛出 `ConfigError`，而不是原生 `TypeError: Invalid URL`。
+- 错误信息应可直接定位到出错配置，至少包含非法 `baseURL`，命中 gateway 时包含 `prefix`。
 
 **示例：自定义 query 序列化**
 

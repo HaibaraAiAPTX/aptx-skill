@@ -9,7 +9,7 @@ description: "创建、配置或扩展 HTTP 客户端时使用。适用于：创
 
 1. 创建 `RequestClient`，先确定全局配置：`baseURL`、`headers`、`timeout`、`querySerializer`、`defaultResponseType`、`strictDecode`。详见 [实例化配置](#实例化配置)
 2. 只在 `@aptx/api-core` 层处理通用行为，不引入业务认证、缓存、重试逻辑。业务逻辑应通过 [Middleware](references/middleware-patterns.md) 和 [Plugin](references/plugin-patterns.md) 实现。
-3. 若需求是“按路径前缀/命名空间选择网关或 baseURL”，优先使用 `UrlResolver` 组合链，不要依赖 middleware 在 URL 固化后再改写。详见 [Plugin - 核心组件替换](#plugin---核心组件替换)
+3. 若需求是“按路径前缀/命名空间选择网关或 baseURL”，优先使用 `UrlResolver` 组合链，不要依赖 middleware 在 URL 固化后再改写。gateway 配置中的 `baseURL` 必须是合法绝对 URL；非法值会在解析阶段抛出 `ConfigError`。详见 [Plugin - 核心组件替换](#plugin---核心组件替换)
 4. 通过 `use(middleware)` 或 `apply(plugin)` 扩展能力，确保核心逻辑保持纯净。详见 [扩展能力](#扩展能力)
 5. 使用 `request:start/end/error/abort` 事件做观测，不在事件回调里修改 payload。详见 [事件系统](#事件系统)
 6. 发生错误时按错误类型分流：`HttpError`、`NetworkError`、`TimeoutError`、`CanceledError`、`ConfigError`、`SerializeError`、`DecodeError`。详见 [defaults.md - ErrorMapper](references/defaults.md#defaulterrormapper)
