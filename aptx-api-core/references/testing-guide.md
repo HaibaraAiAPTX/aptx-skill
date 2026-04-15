@@ -391,13 +391,12 @@ describe("myCompletePlugin", () => {
         // 1. 替换 Transport
         registry.setTransport(mockTransport);
 
-        // 2. 注册 middleware
-        const testMiddleware: Middleware = {
-          async handle(req, ctx, next) {
-            return next(req.with({ url: "https://modified.com" }), ctx);
+        // 2. 替换 UrlResolver
+        registry.setUrlResolver({
+          resolve(req) {
+            return "https://modified.com";
           }
-        };
-        registry.use(testMiddleware);
+        });
 
         // 3. 监听事件
         let eventFired = false;
@@ -415,7 +414,7 @@ describe("myCompletePlugin", () => {
     expect(res.status).toBe(200);
     expect(mockTransport.send).toHaveBeenCalledWith(
       expect.objectContaining({
-        url: "https://modified.com" // middleware 修改了 URL
+        url: "https://modified.com" // resolver 产出了最终 URL
       }),
       expect.any(Context)
     );
@@ -647,6 +646,10 @@ describe("plugin + middleware integration", () => {
   });
 });
 ```
+
+**补充建议**：
+- 如果测试目标是“按路径前缀选择网关”，应测试 `UrlResolver` 或组合后的 `RequestClient`，不要用 middleware 改写已解析 URL 来模拟。
+- middleware 的测试更适合断言 headers、body、错误处理、缓存和重试等横切行为。
 
 ---
 

@@ -74,6 +74,11 @@ const apiVersionMiddleware: Middleware = {
 };
 ```
 
+**边界说明**：
+- 这类 middleware 适合做同一网关内的相对路径改写，例如补版本前缀。
+- 不要用它实现“按路径前缀选择不同网关/baseURL”。那属于 `UrlResolver` 的职责，应在 URL 固化前完成。
+- 如果需求是 `/AuthorityAPI/...` 走专属网关，应该改用 `Plugin + UrlResolver`。
+
 ### 3. 请求头增强 Middleware
 
 ```ts
@@ -341,6 +346,7 @@ client.use(retryMiddleware);        // 第 3 个执行
 3. ✅ 前置处理在 `next()` 前，后置处理在 `next()` 后
 4. ✅ 后置处理用于日志、缓存、监控等场景
 5. ✅ 使用 `try/catch` 捕获 `next()` 的错误
-6. ❌ 不要忘记调用 `next()` 或 `return next(...)`
-7. ❌ 不要阻塞 pipeline（长时间同步操作）
-8. ❌ 不要修改 Response 对象（Response 是不可变的）
+6. ✅ 同一网关内的路径重写可以放在 middleware，跨网关/baseURL 路由放在 `UrlResolver`
+7. ❌ 不要忘记调用 `next()` 或 `return next(...)`
+8. ❌ 不要阻塞 pipeline（长时间同步操作）
+9. ❌ 不要修改 Response 对象（Response 是不可变的）

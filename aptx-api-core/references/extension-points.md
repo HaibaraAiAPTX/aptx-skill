@@ -178,8 +178,14 @@ interface UrlResolver {
 **何时自定义**：
 - 复杂的 query 序列化逻辑
 - 动态 baseURL 选择（多环境）
+- 按路径前缀/命名空间选择网关
 - URL 重写规则
 - 自定义 query 参数格式
+
+**边界规则**：
+- 只要需求依赖“相对路径语义”来选择网关或 baseURL，就应放在 `UrlResolver`。
+- middleware 更适合处理 headers、签名、认证、缓存、重试等横切逻辑，不适合承担跨网关路由。
+- 需要多段 URL 决策时，优先组合 resolver，顺序由组合处显式定义。
 
 **示例：动态 baseURL**
 
@@ -218,6 +224,32 @@ const baseURL = () => {
 };
 
 client.apply(dynamicBaseURLPlugin(baseURL));
+```
+
+**示例：按路径前缀选择网关并保留默认解析**
+
+```ts
+import {
+  Plugin,
+  Registry,
+  DefaultUrlResolver,
+  chainUrlResolvers,
+  createGatewayUrlResolver,
+} from "@aptx/api-core";
+
+const gatewayRoutingPlugin = (fallbackBaseURL: string): Plugin => ({
+  setup(registry: Registry) {
+    registry.setUrlResolver(
+      chainUrlResolvers(
+        createGatewayUrlResolver({
+          "/AuthorityAPI": "https://authority.example.com/root",
+          "/OrderAPI": "https://order.example.com/root",
+        }),
+        new DefaultUrlResolver(fallbackBaseURL),
+      ),
+    );
+  },
+});
 ```
 
 **示例：自定义 query 序列化**
@@ -682,7 +714,8 @@ const errorTrackingMapperPlugin: Plugin = {
 | 修改响应数据 | Middleware | 不影响核心功能 |
 | 记录请求/响应日志 | Plugin（事件） | 需要监听事件 |
 | 替换 HTTP 客户端 | Plugin（Transport） | 需要替换底层实现 |
-| 修改 URL 解析逻辑 | Plugin（UrlResolver） | 需要替换 URL 解析 |
+| 修改 URL 解析逻辑 | Plugin（UrlResolver） | 需要替换或组合 URL 解析 |
+| 按路径前缀选择网关 | Plugin（UrlResolver） | 需要在 URL 固化前完成路由 |
 | 自定义序列化格式 | Plugin（BodySerializer） | 需要替换序列化逻辑 |
 | 自定义解码格式 | Plugin（Decoder） | 需要替换解码逻辑 |
 | 自定义错误类型 | Plugin（ErrorMapper） | 需要替换错误映射 |
@@ -733,3 +766,4 @@ client.apply(myCompletePlugin);
 6. ❌ 不要在 Plugin 中执行业务逻辑（应在 Middleware）
 7. ❌ 不要在替换组件时丢失默认行为（应 fallback）
 8. ❌ 不要假设组件的调用顺序
+9. ❌ 不要把跨网关路由放进 middleware，尤其不要依赖它改写已固化的绝对 URL

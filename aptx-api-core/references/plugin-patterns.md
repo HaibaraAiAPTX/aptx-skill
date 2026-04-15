@@ -171,7 +171,12 @@ client.apply(protobufDecoderPlugin);
 
 ### 替换 UrlResolver
 
-**何时使用**：复杂的 query 序列化、动态 baseURL 选择、URL 重写规则
+**何时使用**：复杂的 query 序列化、动态 baseURL 选择、按路径前缀选择网关、URL 重写规则
+
+**决策规则**：
+- 路径级网关路由属于 URL 解析，不属于 middleware 事后修补。
+- 需要“先选网关，再走默认 baseURL 解析”时，优先组合多个 resolver，而不是把后注册的 plugin 直接覆盖前一个 resolver。
+- 顺序由组合时显式声明，谁先谁后不要靠 plugin 注册先后猜测。
 
 ```ts
 import { Plugin, Registry, UrlResolver } from "@aptx/api-core";
@@ -191,6 +196,34 @@ const dynamicBaseURLPlugin = (getBaseURL: () => string): Plugin => ({
 });
 
 client.apply(dynamicBaseURLPlugin(() => window.location.origin));
+```
+
+**示例：组合网关路由与默认解析**
+
+```ts
+import {
+  Plugin,
+  Registry,
+  DefaultUrlResolver,
+  chainUrlResolvers,
+  createGatewayUrlResolver,
+} from "@aptx/api-core";
+
+const gatewayRoutingPlugin = (fallbackBaseURL: string): Plugin => ({
+  setup(registry: Registry) {
+    registry.setUrlResolver(
+      chainUrlResolvers(
+        createGatewayUrlResolver({
+          "/AuthorityAPI": "https://authority.example.com/root",
+          "/OrderAPI": "https://order.example.com/root",
+        }),
+        new DefaultUrlResolver(fallbackBaseURL),
+      ),
+    );
+  },
+});
+
+client.apply(gatewayRoutingPlugin("https://fallback.example.com/root"));
 ```
 
 ### 替换 ErrorMapper
@@ -298,6 +331,7 @@ client
 | 日志记录 | Plugin | 需要监听事件 |
 | 缓存 | Middleware | 横切关注点 |
 | 替换 HTTP 客户端 | Plugin | 替换核心组件 |
+| 按路径前缀切换网关 | Plugin | 需要参与 URL 解析顺序 |
 | 添加认证 | Middleware | 横切关注点 |
 | 支持 Protobuf | Plugin | 替换 Decoder |
 | 错误追踪 | Plugin | 需要监听事件 |
@@ -310,5 +344,6 @@ client
 3. ✅ Plugin setup 中可以注册多个 middleware
 4. ✅ Plugin 可以组合使用（`client.apply(p1).apply(p2)`）
 5. ✅ 使用工厂函数创建带参数的 Plugin
-6. ❌ 不要在 Plugin 中执行业务逻辑（应在 Middleware）
-7. ❌ 不要在 Plugin 中修改 Request/Response（应在 Middleware）
+6. ✅ 需要网关路由时，用 `chainUrlResolvers(...)` 显式声明 resolver 顺序
+7. ❌ 不要在 Plugin 中执行业务逻辑（应在 Middleware）
+8. ❌ 不要在 Plugin 中修改 Request/Response（应在 Middleware）
