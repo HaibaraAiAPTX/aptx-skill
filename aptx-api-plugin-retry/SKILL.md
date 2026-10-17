@@ -8,7 +8,7 @@ description: "实现请求自动重试时使用。适用于：网络不稳定导
 ## 安装
 
 ```bash
-pnpm add @aptx/api-plugin-retry
+pnpm add @aptx-js/api-plugin-retry
 ```
 
 ## API 接口
@@ -25,7 +25,7 @@ function createRetryMiddleware(options: RetryOptions): Middleware;
 
 ## 单次调用覆盖（Per-call Override）
 
-`@aptx/api-plugin-retry` 支持通过 `req.meta.__aptxRetry` 对单次调用覆盖重试行为（无需在运行时层重复实现重试逻辑）。
+`@aptx-js/api-plugin-retry` 支持通过 `req.meta.__aptxRetry` 对单次调用覆盖重试行为（无需在运行时层重复实现重试逻辑）。
 
 ```ts
 // 禁用本次调用重试
@@ -84,7 +84,7 @@ type RetryMetaOverride = {
 最小模板：
 
 ```ts
-import { createRetryMiddleware } from "@aptx/api-plugin-retry";
+import { createRetryMiddleware } from "@aptx-js/api-plugin-retry";
 
 const retry = createRetryMiddleware({
   retries: 2,  // 总共 3 次尝试（首次 + 2 次重试）

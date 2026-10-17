@@ -309,7 +309,7 @@ class RobustCookieTokenStore implements TokenStore {
 
 ```ts
 // 推荐做法
-import type { TokenStore, TokenMeta, TokenRecord } from '@aptx/token-store';
+import type { TokenStore, TokenMeta, TokenRecord } from '@aptx-js/token-store';
 
 class MyTokenStore implements TokenStore {
   getToken(): string | undefined {

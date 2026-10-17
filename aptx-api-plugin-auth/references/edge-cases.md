@@ -10,8 +10,8 @@ SSR 环境下，不同用户的请求必须使用独立的 store 实例，避免
 
 ```ts
 import { cookies } from "next/headers";
-import { createAuthMiddleware } from "@aptx/api-plugin-auth";
-import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+import { createAuthMiddleware } from "@aptx-js/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx-js/token-store-ssr-cookie";
 
 // ✅ 正确：使用异步工厂函数，每请求独立 store
 const auth = createAuthMiddleware({
@@ -36,8 +36,8 @@ const auth = createAuthMiddleware({
 ### Next.js Pages Router
 
 ```ts
-import { createAuthMiddleware } from "@aptx/api-plugin-auth";
-import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+import { createAuthMiddleware } from "@aptx-js/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx-js/token-store-ssr-cookie";
 
 export function getServerSideProps(ctx) {
   // 使用同步工厂函数，从请求上下文创建 store
@@ -113,10 +113,10 @@ refreshToken: async () => {
 
 ## 跨标签页 Token 同步
 
-当用户打开多个标签页时，需要同步 token 状态。推荐使用 cookie 存储（`@aptx/token-store-cookie`）：
+当用户打开多个标签页时，需要同步 token 状态。推荐使用 cookie 存储（`@aptx-js/token-store-cookie`）：
 
 ```ts
-import { createCookieTokenStore } from "@aptx/token-store-cookie";
+import { createCookieTokenStore } from "@aptx-js/token-store-cookie";
 
 // Cookie 自动在标签页间共享
 const store = createCookieTokenStore({
@@ -170,7 +170,7 @@ window.addEventListener("storage", (e) => {
 **解决方案**：使用 `SKIP_AUTH_REFRESH_META_KEY` 标记刷新请求：
 
 ```ts
-import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx-js/api-plugin-auth";
 
 // ✅ 正确：刷新请求标记跳过 auth 刷新
 export function buildRefreshTokenSpec(): RequestSpec {

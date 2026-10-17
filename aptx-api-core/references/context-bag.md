@@ -48,7 +48,7 @@ interface Context {
 ## 创建 Bag Key
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 // 推荐：使用 createBagKey 创建唯一 symbol
 const RETRY_COUNT_KEY = createBagKey("retry_count");
@@ -62,7 +62,7 @@ const LOGGING_KEY = createBagKey("logging_data");
 默认 bag key，用于区分超时和用户取消：
 
 ```ts
-import { TIMEOUT_BAG_KEY } from "@aptx/api-core";
+import { TIMEOUT_BAG_KEY } from "@aptx-js/api-core";
 
 const timeoutCheckingMiddleware: Middleware = {
   async handle(req, ctx, next) {
@@ -85,7 +85,7 @@ const timeoutCheckingMiddleware: Middleware = {
 使用 `assertBagKey` 确保 bag key 是 symbol 类型：
 
 ```ts
-import { assertBagKey } from "@aptx/api-core";
+import { assertBagKey } from "@aptx-js/api-core";
 
 function getFromBag<T>(ctx: Context, key: unknown): T | undefined {
   assertBagKey(key); // 如果不是 symbol 会抛出 ConfigError
@@ -98,7 +98,7 @@ function getFromBag<T>(ctx: Context, key: unknown): T | undefined {
 ### 1. 跟踪请求状态
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const STATE_KEY = createBagKey("request_state");
 
@@ -130,7 +130,7 @@ const loggingMiddleware: Middleware = {
 ### 2. 防止无限循环（参考 auth middleware）
 
 ```ts
-import { Middleware, createBagKey, HttpError } from "@aptx/api-core";
+import { Middleware, createBagKey, HttpError } from "@aptx-js/api-core";
 
 const AUTH_RETRY_KEY = createBagKey("auth_retry");
 
@@ -163,7 +163,7 @@ const authMiddleware: Middleware = {
 ### 3. 共享缓存实例
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const CACHE_KEY = createBagKey("request_cache");
 
@@ -190,7 +190,7 @@ const cacheMiddleware: Middleware = {
 ### 4. 请求计器
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const COUNTER_KEY = createBagKey("request_counter");
 
@@ -219,7 +219,7 @@ const finalLoggingMiddleware: Middleware = {
 ### 5. 性能追踪
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const TIMING_KEY = createBagKey("timing");
 
@@ -261,7 +261,7 @@ const timingPlugin: Plugin = {
 ### 6. 跨 Middleware 数据传递
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const USER_KEY = createBagKey("current_user");
 
@@ -301,7 +301,7 @@ const userValidationMiddleware: Middleware = {
 ### 7. 请求 ID 追踪
 
 ```ts
-import { Middleware, createBagKey } from "@aptx/api-core";
+import { Middleware, createBagKey } from "@aptx-js/api-core";
 
 const TRACE_ID_KEY = createBagKey("trace_id");
 
@@ -407,7 +407,7 @@ const cancellationMiddleware: Middleware = {
 
 ## 实际案例：Auth Middleware 中的 Bag 使用
 
-参考 `@aptx/api-plugin-auth` 的实现：
+参考 `@aptx-js/api-plugin-auth` 的实现：
 
 ```ts
 const AUTH_RETRY_KEY = createBagKey("auth_retry");

@@ -23,15 +23,15 @@ client.use(csrfMiddleware);
 client.use(cacheMiddleware);
 ```
 
-## 与 @aptx/api-plugin-auth 集成
+## 与 @aptx-js/api-plugin-auth 集成
 
 ### 问题：认证失败时的重试
 
 如果 auth middleware 返回 401，retry middleware 可能会不断重试。解决方案：
 
 ```ts
-import { createRetryMiddleware } from '@aptx/api-plugin-retry';
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createRetryMiddleware } from '@aptx-js/api-plugin-retry';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 
 const retry = createRetryMiddleware({
   retries: 3,
@@ -60,7 +60,7 @@ client.use(auth);
 当 auth middleware 刷新 token 时，刷新请求本身不应被重试：
 
 ```ts
-import { SKIP_AUTH_REFRESH_META_KEY } from '@aptx/api-plugin-auth';
+import { SKIP_AUTH_REFRESH_META_KEY } from '@aptx-js/api-plugin-auth';
 
 const refreshToken = async () => {
   // 刷新请求跳过重试
@@ -75,12 +75,12 @@ const refreshToken = async () => {
 };
 ```
 
-## 与 @aptx/api-plugin-csrf 集成
+## 与 @aptx-js/api-plugin-csrf 集成
 
 CSRF token 应该在每次请求时读取，不受重试影响：
 
 ```ts
-import { createCsrfMiddleware } from '@aptx/api-plugin-csrf';
+import { createCsrfMiddleware } from '@aptx-js/api-plugin-csrf';
 
 const csrf = createCsrfMiddleware({
   cookieName: 'XSRF-TOKEN',

@@ -15,7 +15,7 @@ description: "添加 CSRF/XSRF 安全保护时使用。适用于：自动在请�
 4. 确认前后端约定的 cookie/header 名称一致
 5. 将中间件挂载到 `RequestClient.use()` 或构造函数
 
-**注意:** 需要同时安装 `@aptx/api-core` 作为 peer dependency。
+**注意:** 需要同时安装 `@aptx-js/api-core` 作为 peer dependency。
 
 ---
 
@@ -44,8 +44,8 @@ description: "添加 CSRF/XSRF 安全保护时使用。适用于：自动在请�
 ### 浏览器环境
 
 ```ts
-import { RequestClient } from "@aptx/api-core";
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { RequestClient } from "@aptx-js/api-core";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 const client = new RequestClient({
   middlewares: [
@@ -62,7 +62,7 @@ const client = new RequestClient({
 ### 渐进式增强
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 const client = new RequestClient();
 client.use(createCsrfMiddleware({
@@ -75,7 +75,7 @@ client.use(createCsrfMiddleware({
 ### SSR/Next.js 环境
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 import { cookies } from 'next/headers';
 
 const csrf = createCsrfMiddleware({
@@ -92,7 +92,7 @@ const csrf = createCsrfMiddleware({
 ### Node.js/Express 环境
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 const csrf = createCsrfMiddleware({
   cookieName: "XSRF-TOKEN",

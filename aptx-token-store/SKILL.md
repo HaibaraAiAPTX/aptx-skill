@@ -11,15 +11,15 @@ description: "实现 token 持久化存储时使用。适用于：实现 TokenSt
 
 1. 实现 `TokenStore` 的最小能力：`getToken`、`setToken`、`clearToken`。
 2. 若需要过期控制，提供 `getMeta/setMeta` 或 `getRecord/setRecord`，并确保 `meta.expiresAt` 可读取。
-3. 保持实现无业务耦合，不包含请求逻辑，不依赖 `@aptx/api-core`。
+3. 保持实现无业务耦合，不包含请求逻辑，不依赖 `@aptx-js/api-core`。
 4. 把环境相关能力放到独立包中（如 cookie、小程序、内存）。
-5. 以 `@aptx/api-plugin-auth` 作为主要消费方进行联调测试。
+5. 以 `@aptx-js/api-plugin-auth` 作为主要消费方进行联调测试。
 6. 所有方法必须保持同步/异步一致性，不可混用。
 
 ## 接口定义
 
 ```ts
-import type { TokenStore, TokenMeta, TokenRecord, TokenStoreResolver } from '@aptx/token-store';
+import type { TokenStore, TokenMeta, TokenRecord, TokenStoreResolver } from '@aptx-js/token-store';
 
 interface TokenStore {
   // 核心方法（必须实现）
@@ -44,7 +44,7 @@ interface TokenRecord {
   meta?: TokenMeta;
 }
 
-// Store 解析器类型（用于 @aptx/api-plugin-auth）
+// Store 解析器类型（用于 @aptx-js/api-plugin-auth）
 type TokenStoreResolver =
   | TokenStore                    // 直接实例（向后兼容）
   | (() => TokenStore)            // 同步工厂函数
@@ -58,7 +58,7 @@ type TokenStoreResolver =
 统一处理三种 `TokenStoreResolver` 形式，返回 `TokenStore` 实例：
 
 ```ts
-import { resolveTokenStore } from '@aptx/token-store';
+import { resolveTokenStore } from '@aptx-js/token-store';
 
 // 三种形式都会被正确解析为 TokenStore
 const store1 = await resolveTokenStore(directInstance);
@@ -66,7 +66,7 @@ const store2 = await resolveTokenStore(syncFactory);
 const store3 = await resolveTokenStore(asyncFactory);
 ```
 
-**使用场景：** 当你需要统一处理用户传入的 store 参数时使用。`@aptx/api-plugin-auth` 内部使用此函数。
+**使用场景：** 当你需要统一处理用户传入的 store 参数时使用。`@aptx-js/api-plugin-auth` 内部使用此函数。
 
 ## 实现检查清单
 
@@ -75,7 +75,7 @@ const store3 = await resolveTokenStore(asyncFactory);
 - [ ] `meta.expiresAt` 支持时间戳格式（毫秒）
 - [ ] 所有方法保持同步/异步一致性（不可混用）
 - [ ] `clearToken()` 同时清除 token 和 meta 数据
-- [ ] 不依赖 `@aptx/api-core` 或请求库
+- [ ] 不依赖 `@aptx-js/api-core` 或请求库
 - [ ] 实现了 `TokenStoreFactory.create()`（如果需要配置）
 
 ## 同步/异步选择规则
@@ -110,7 +110,7 @@ const store3 = await resolveTokenStore(asyncFactory);
 当实现需要配置时，使用 Factory 模式：
 
 ```ts
-import type { TokenStoreFactory } from '@aptx/token-store';
+import type { TokenStoreFactory } from '@aptx-js/token-store';
 
 // 定义配置接口
 export interface YourStoreOptions {
@@ -142,12 +142,12 @@ export const createYourTokenStore: TokenStoreFactory<YourStoreOptions>["create"]
 };
 ```
 
-## 与 @aptx/api-plugin-auth 集成
+## 与 @aptx-js/api-plugin-auth 集成
 
 ### 基本集成模式
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 
 client.use(createAuthMiddleware({
   store,                      // 你的 TokenStore 实现

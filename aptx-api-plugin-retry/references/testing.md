@@ -6,8 +6,8 @@
 
 ```ts
 import { describe, it, expect, vi } from 'vitest';
-import { RequestClient } from '@aptx/api-core';
-import { createRetryMiddleware } from '@aptx/api-plugin-retry';
+import { RequestClient } from '@aptx-js/api-core';
+import { createRetryMiddleware } from '@aptx-js/api-plugin-retry';
 
 describe('retry middleware', () => {
   it('should retry on network error and succeed', async () => {

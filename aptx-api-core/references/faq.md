@@ -61,7 +61,7 @@ await client.fetch("/upload", {
 **A**: 检查 `ctx.bag.get(TIMEOUT_BAG_KEY)`。
 
 ```ts
-import { TIMEOUT_BAG_KEY } from "@aptx/api-core";
+import { TIMEOUT_BAG_KEY } from "@aptx-js/api-core";
 
 const timeoutCheckingMiddleware: Middleware = {
   async handle(req, ctx, next) {
@@ -88,7 +88,7 @@ const timeoutCheckingMiddleware: Middleware = {
 **A**: 使用 Context Bag 存储重试计数。
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 const AUTH_RETRY_KEY = createBagKey("auth_retry");
 
@@ -147,7 +147,7 @@ const authMiddleware: Middleware = {
 **A**: 使用 `ctx.bag` 和 `createBagKey()`。
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 const USER_KEY = createBagKey("user");
 
@@ -261,7 +261,7 @@ const blobRes = await client.fetch("/file.pdf", {
 **A**: 替换 `BodySerializer`。
 
 ```ts
-import { Plugin, Registry, BodySerializer } from "@aptx/api-core";
+import { Plugin, Registry, BodySerializer } from "@aptx-js/api-core";
 
 const customDateSerializerPlugin: Plugin = {
   setup(registry: Registry) {

@@ -17,10 +17,10 @@ Custom fields are automatically serialized to JSON in the meta cookie.
 
 ## Type Imports
 
-Import types from `@aptx/token-store`:
+Import types from `@aptx-js/token-store`:
 
 ```ts
-import type { TokenMeta, TokenRecord } from "@aptx/token-store";
+import type { TokenMeta, TokenRecord } from "@aptx-js/token-store";
 ```
 
 ### Type Definitions
@@ -31,7 +31,7 @@ import type { TokenMeta, TokenRecord } from "@aptx/token-store";
 ### Usage Example
 
 ```ts
-import type { TokenMeta, TokenRecord } from "@aptx/token-store";
+import type { TokenMeta, TokenRecord } from "@aptx-js/token-store";
 
 const record: TokenRecord = {
   token: "abc123",

@@ -8,7 +8,7 @@ description: "创建、配置或扩展 HTTP 客户端时使用。适用于：创
 在需要接入或调整请求内核时，按以下顺序执行：
 
 1. 创建 `RequestClient`，先确定全局配置：`baseURL`、`headers`、`timeout`、`querySerializer`、`defaultResponseType`、`strictDecode`。详见 [实例化配置](#实例化配置)
-2. 只在 `@aptx/api-core` 层处理通用行为，不引入业务认证、缓存、重试逻辑。业务逻辑应通过 [Middleware](references/middleware-patterns.md) 和 [Plugin](references/plugin-patterns.md) 实现。
+2. 只在 `@aptx-js/api-core` 层处理通用行为，不引入业务认证、缓存、重试逻辑。业务逻辑应通过 [Middleware](references/middleware-patterns.md) 和 [Plugin](references/plugin-patterns.md) 实现。
 3. 若需求是“按路径前缀/命名空间选择网关或 baseURL”，优先使用 `UrlResolver` 组合链，不要依赖 middleware 在 URL 固化后再改写。gateway 配置中的 `baseURL` 必须是合法绝对 URL；非法值会在解析阶段抛出 `ConfigError`。详见 [Plugin - 核心组件替换](#plugin---核心组件替换)
 4. 通过 `use(middleware)` 或 `apply(plugin)` 扩展能力，确保核心逻辑保持纯净。详见 [扩展能力](#扩展能力)
 5. 使用 `request:start/end/error/abort` 事件做观测，不在事件回调里修改 payload。详见 [事件系统](#事件系统)
@@ -17,7 +17,7 @@ description: "创建、配置或扩展 HTTP 客户端时使用。适用于：创
 最小接入模板：
 
 ```ts
-import { RequestClient } from "@aptx/api-core";
+import { RequestClient } from "@aptx-js/api-core";
 
 const client = new RequestClient({
   baseURL: "/api",
@@ -124,7 +124,7 @@ import {
   ErrorMapper,
   Middleware,
   EventBus,
-} from "@aptx/api-core";
+} from "@aptx-js/api-core";
 
 const client = new RequestClient({
   // 基础配置
@@ -174,7 +174,7 @@ const res = await client.fetch("/user", {
 适用于需要手动构建 `Request` 对象的场景：
 
 ```ts
-import { Request } from "@aptx/api-core";
+import { Request } from "@aptx-js/api-core";
 
 const req = new Request({
   method: "POST",
@@ -248,7 +248,7 @@ Middleware 用于处理横切关注点，如日志、认证、重试等。详见
 
 创建自定义 middleware：
 ```ts
-import { Middleware, Request, Context, Response } from "@aptx/api-core";
+import { Middleware, Request, Context, Response } from "@aptx-js/api-core";
 
 const loggingMiddleware: Middleware = {
   async handle(req, ctx, next) {
@@ -328,7 +328,7 @@ client.events.on("request:abort", ({ req, ctx, durationMs }) => {
 `createClient()` 是 `new RequestClient()` 的别名：
 
 ```ts
-import { createClient } from "@aptx/api-core";
+import { createClient } from "@aptx-js/api-core";
 
 const client = createClient({
   baseURL: "/api",

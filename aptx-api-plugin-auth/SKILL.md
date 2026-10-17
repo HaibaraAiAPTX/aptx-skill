@@ -30,9 +30,9 @@ description: "处理用户认证和 token 管理时使用。适用于：token �
 
 默认推荐搭配：
 
-- `@aptx/token-store`（TokenStore 接口定义）
-- `@aptx/token-store-cookie`（浏览器 cookie 实现）
-- SSR：`@aptx/token-store-ssr-cookie`（Node/SSR request-scoped cookie 实现）
+- `@aptx-js/token-store`（TokenStore 接口定义）
+- `@aptx-js/token-store-cookie`（浏览器 cookie 实现）
+- SSR：`@aptx-js/token-store-ssr-cookie`（Node/SSR request-scoped cookie 实现）
 
 ---
 
@@ -47,7 +47,7 @@ type TokenStoreResolver =
   | (() => Promise<TokenStore>);  // 异步工厂函数（SSR）
 ```
 
-`TokenStore` 接口（由 `@aptx/token-store` 提供）：
+`TokenStore` 接口（由 `@aptx-js/token-store` 提供）：
 
 ```typescript
 interface TokenStore {
@@ -79,8 +79,8 @@ interface TokenStore {
 | 异步工厂函数 | SSR 端 | 每请求独立 store，从请求上下文读取 cookie |
 
 推荐实现：
-- `@aptx/token-store-cookie` - 浏览器 cookie 存储（自动跨标签页同步）
-- `@aptx/token-store-ssr-cookie` - SSR cookie 存储（每请求独立）
+- `@aptx-js/token-store-cookie` - 浏览器 cookie 存储（自动跨标签页同步）
+- `@aptx-js/token-store-ssr-cookie` - SSR cookie 存储（每请求独立）
 - 自定义实现（如 localStorage、sessionStorage、IndexedDB）
 
 ---
@@ -92,8 +92,8 @@ interface TokenStore {
 最小模板：
 
 ```ts
-import { createAuthMiddleware } from "@aptx/api-plugin-auth";
-import { createCookieTokenStore } from "@aptx/token-store-cookie";
+import { createAuthMiddleware } from "@aptx-js/api-plugin-auth";
+import { createCookieTokenStore } from "@aptx-js/token-store-cookie";
 
 const store = createCookieTokenStore({
   tokenKey: "aptx_token",
@@ -118,8 +118,8 @@ SSR 环境需要为每个请求创建独立的 store，因为 cookie 需要从�
 
 ```ts
 import { cookies } from "next/headers";
-import { createAuthMiddleware } from "@aptx/api-plugin-auth";
-import { createSsrCookieTokenStore } from "@aptx/token-store-ssr-cookie";
+import { createAuthMiddleware } from "@aptx-js/api-plugin-auth";
+import { createSsrCookieTokenStore } from "@aptx-js/token-store-ssr-cookie";
 
 // 创建请求级别的 API 客户端
 export async function createServerApiClient() {
@@ -156,7 +156,7 @@ export async function createServerApiClient() {
 对于需要手动控制 token 的场景（如手动刷新、预加载 token）：
 
 ```ts
-import { createAuthController } from "@aptx/api-plugin-auth";
+import { createAuthController } from "@aptx-js/api-plugin-auth";
 
 const controller = createAuthController({
   store,
@@ -210,7 +210,7 @@ return {
 return "new-token"; // 适用于不需要过期时间的场景
 ```
 
-优先返回包含 `expiresAt` 的对象，便于存储层（如 `@aptx/token-store-cookie`）同步过期时间。
+优先返回包含 `expiresAt` 的对象，便于存储层（如 `@aptx-js/token-store-cookie`）同步过期时间。
 
 ### 自定义 header 配置
 
@@ -263,7 +263,7 @@ const auth = createAuthMiddleware({
 用于标记请求跳过 auth 刷新逻辑，避免 refreshToken 请求本身返回 401 时触发死锁。
 
 ```ts
-import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx-js/api-plugin-auth";
 
 // 在 refreshToken 请求的 spec 中添加此标记
 const refreshTokenSpec = {
@@ -333,7 +333,7 @@ const auth = createAuthMiddleware({
 **解决方案**：
 
 ```ts
-import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx/api-plugin-auth";
+import { SKIP_AUTH_REFRESH_META_KEY } from "@aptx-js/api-plugin-auth";
 
 // refreshToken 请求的 spec 必须添加跳过标记
 export function buildRefreshTokenSpec(): RequestSpec {

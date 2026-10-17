@@ -3,7 +3,7 @@
 ## 创建 Hooks
 
 ```typescript
-import { createVueQueryHooks } from '@aptx/api-query-vue';
+import { createVueQueryHooks } from '@aptx-js/api-query-vue';
 
 // 生成 hooks
 const useAssignmentHooks = createVueQueryHooks(assignmentQueryDef);

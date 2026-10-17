@@ -27,7 +27,7 @@
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { Context, Request, Response, Middleware } from "@aptx/api-core";
+import { Context, Request, Response, Middleware } from "@aptx-js/api-core";
 
 describe("myMiddleware", () => {
   it("should add custom header", async () => {
@@ -126,7 +126,7 @@ describe("retryMiddleware", () => {
 ### 测试 Bag 交互
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 describe("stateMiddleware", () => {
   it("should share state via bag", async () => {
@@ -199,8 +199,8 @@ describe("stateMiddleware", () => {
 > 详见 [context-bag.md](context-bag.md) 了解 Auth Middleware 如何使用 Bag 防止无限重试，[middleware-patterns.md](middleware-patterns.md) 了解其他 Middleware 模式。
 
 ```ts
-import { createAuthMiddleware } from "@aptx/api-plugin-auth";
-import { HttpError } from "@aptx/api-core";
+import { createAuthMiddleware } from "@aptx-js/api-plugin-auth";
+import { HttpError } from "@aptx-js/api-core";
 
 describe("authMiddleware", () => {
   it("should refresh on 401 and retry once", async () => {
@@ -278,8 +278,8 @@ describe("authMiddleware", () => {
 ### 基础 Plugin 测试
 
 ```ts
-import { Plugin, Registry, Transport, TransportResult } from "@aptx/api-core";
-import { RequestClient } from "@aptx/api-core";
+import { Plugin, Registry, Transport, TransportResult } from "@aptx-js/api-core";
+import { RequestClient } from "@aptx-js/api-core";
 
 describe("myPlugin", () => {
   it("should register middleware", async () => {

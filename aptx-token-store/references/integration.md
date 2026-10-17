@@ -1,6 +1,6 @@
-# 与 @aptx/api-plugin-auth 集成指南
+# 与 @aptx-js/api-plugin-auth 集成指南
 
-本文档详细介绍如何将自定义 `TokenStore` 与 `@aptx/api-plugin-auth` 集成。
+本文档详细介绍如何将自定义 `TokenStore` 与 `@aptx-js/api-plugin-auth` 集成。
 
 ## 目录
 
@@ -14,7 +14,7 @@
 ## 基本集成模式
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 
 client.use(createAuthMiddleware({
   store,                      // 你的 TokenStore 实现
@@ -118,7 +118,7 @@ interface TokenStore {
 ### 场景 1：使用 localStorage 实现
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 import { LocalStorageTokenStore } from './stores/localStorage';
 
 const store = new LocalStorageTokenStore();
@@ -143,7 +143,7 @@ client.use(createAuthMiddleware({
 ### 场景 2：使用 Cookie 实现（支持 SameSite）
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 import { CookieTokenStore } from './stores/cookie';
 
 const store = new CookieTokenStore({
@@ -168,7 +168,7 @@ client.use(createAuthMiddleware({
 ### 场景 3：小程序实现
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 import { WeappTokenStore } from './stores/weapp';
 
 const store = new WeappTokenStore();
@@ -194,7 +194,7 @@ client.use(createAuthMiddleware({
 ### 场景 4：内存存储（仅用于测试）
 
 ```ts
-import { createAuthMiddleware } from '@aptx/api-plugin-auth';
+import { createAuthMiddleware } from '@aptx-js/api-plugin-auth';
 import { MemoryTokenStore } from './test-utils';
 
 const store = new MemoryTokenStore();

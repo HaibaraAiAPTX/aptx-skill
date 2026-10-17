@@ -35,7 +35,7 @@
 ### Plugin 接口
 
 ```ts
-import { Plugin, Registry } from "@aptx/api-core";
+import { Plugin, Registry } from "@aptx-js/api-core";
 
 const myPlugin: Plugin = {
   setup(registry: Registry) {
@@ -51,7 +51,7 @@ client.apply(myPlugin);
 **何时使用**：从 Fetch 换到 Axios/XMLHttpRequest、WebSocket、其他 HTTP 客户端
 
 ```ts
-import { Plugin, Registry, Transport, TransportResult } from "@aptx/api-core";
+import { Plugin, Registry, Transport, TransportResult } from "@aptx-js/api-core";
 import axios from "axios";
 
 const axiosTransportPlugin: Plugin = {
@@ -88,7 +88,7 @@ client.apply(axiosTransportPlugin);
 **何时使用**：请求日志、性能监控、错误追踪、A/B 测试
 
 ```ts
-import { Plugin, Registry } from "@aptx/api-core";
+import { Plugin, Registry } from "@aptx-js/api-core";
 
 const eventLoggingPlugin: Plugin = {
   setup(registry: Registry) {
@@ -140,7 +140,7 @@ const eventTrackingPlugin: Plugin = {
 **何时使用**：支持 Protobuf、MsgPack、自定义 JSON 解析、BigInt 支持
 
 ```ts
-import { Plugin, Registry, ResponseDecoder, Response } from "@aptx/api-core";
+import { Plugin, Registry, ResponseDecoder, Response } from "@aptx-js/api-core";
 import { MyMessage } from "./my-proto";
 
 const protobufDecoderPlugin: Plugin = {
@@ -179,7 +179,7 @@ client.apply(protobufDecoderPlugin);
 - 顺序由组合时显式声明，谁先谁后不要靠 plugin 注册先后猜测。
 
 ```ts
-import { Plugin, Registry, UrlResolver } from "@aptx/api-core";
+import { Plugin, Registry, UrlResolver } from "@aptx-js/api-core";
 
 const dynamicBaseURLPlugin = (getBaseURL: () => string): Plugin => ({
   setup(registry: Registry) {
@@ -207,7 +207,7 @@ import {
   DefaultUrlResolver,
   chainUrlResolvers,
   createGatewayUrlResolver,
-} from "@aptx/api-core";
+} from "@aptx-js/api-core";
 
 const gatewayRoutingPlugin = (fallbackBaseURL: string): Plugin => ({
   setup(registry: Registry) {
@@ -231,7 +231,7 @@ client.apply(gatewayRoutingPlugin("https://fallback.example.com/root"));
 **何时使用**：根据业务状态码映射错误、添加额外的错误上下文、集成错误追踪服务
 
 ```ts
-import { Plugin, Registry, ErrorMapper, HttpError } from "@aptx/api-core";
+import { Plugin, Registry, ErrorMapper, HttpError } from "@aptx-js/api-core";
 
 const businessErrorMapperPlugin: Plugin = {
   setup(registry: Registry) {
@@ -260,7 +260,7 @@ client.apply(businessErrorMapperPlugin);
 ### 组合多个能力
 
 ```ts
-import { Plugin, Registry } from "@aptx/api-core";
+import { Plugin, Registry } from "@aptx-js/api-core";
 
 const myPlugin: Plugin = {
   setup(registry: Registry) {
@@ -285,7 +285,7 @@ client.apply(myPlugin);
 > 详见 [middleware-patterns.md](middleware-patterns.md) 了解常见的 Middleware 实现模式，[context-bag.md](context-bag.md) 了解如何在 Middleware 间共享状态。
 
 ```ts
-import { Plugin, Registry } from "@aptx/api-core";
+import { Plugin, Registry } from "@aptx-js/api-core";
 
 const authPlugin: Plugin = ({
   store,

@@ -263,7 +263,7 @@ class MemoryTokenStore implements TokenStore {
 当实现需要配置时，使用 Factory 模式：
 
 ```ts
-import type { TokenStoreFactory } from '@aptx/token-store';
+import type { TokenStoreFactory } from '@aptx-js/token-store';
 
 // 定义配置接口
 export interface YourStoreOptions {

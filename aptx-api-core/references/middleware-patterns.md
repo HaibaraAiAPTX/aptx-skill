@@ -18,7 +18,7 @@
 ## 核心结构
 
 ```ts
-import { Middleware, Request, Context, Response, Next } from "@aptx/api-core";
+import { Middleware, Request, Context, Response, Next } from "@aptx-js/api-core";
 
 const myMiddleware: Middleware = {
   async handle(req: Request, ctx: Context, next: Next): Promise<Response> {
@@ -99,7 +99,7 @@ const userAgentMiddleware: Middleware = {
 > 详见 [context-bag.md](context-bag.md) 了解 Bag 的更多使用场景。
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 const CACHE_KEY = createBagKey("cache");
 
@@ -141,7 +141,7 @@ const signatureMiddleware: Middleware = {
 ### 6. 限流 Middleware
 
 ```ts
-import { createBagKey } from "@aptx/api-core";
+import { createBagKey } from "@aptx-js/api-core";
 
 const RATE_LIMIT_KEY = createBagKey("rate_limit");
 
@@ -192,7 +192,7 @@ const dedupeMiddleware: Middleware = {
 用于处理 HTTP 200 但业务逻辑失败的场景（如 `{ IsSuccess: false, Error: "..." }`）：
 
 ```ts
-import { Response } from "@aptx/api-core";
+import { Response } from "@aptx-js/api-core";
 
 // 自定义业务错误类型
 class BusinessError extends Error {
@@ -253,7 +253,7 @@ import {
   NetworkError,
   TimeoutError,
   CanceledError,
-} from "@aptx/api-core";
+} from "@aptx-js/api-core";
 
 // 假设有 UI 反馈函数
 declare function showErrorToast(message: string): void;

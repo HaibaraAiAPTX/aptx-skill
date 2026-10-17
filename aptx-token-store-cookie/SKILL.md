@@ -10,7 +10,7 @@ description: "在浏览器 cookie 中存储 token 时使用。适用于：create
 Create store with default configuration:
 
 ```ts
-import { createCookieTokenStore } from "@aptx/token-store-cookie";
+import { createCookieTokenStore } from "@aptx-js/token-store-cookie";
 
 const store = createCookieTokenStore({
   tokenKey: "aptx_token",
@@ -29,7 +29,7 @@ const store = createCookieTokenStore({
 除了 `createCookieTokenStore` 工厂函数，还可以直接使用 `CookieTokenStore` 类：
 
 ```ts
-import { CookieTokenStore, CookieTokenStoreOptions } from "@aptx/token-store-cookie";
+import { CookieTokenStore, CookieTokenStoreOptions } from "@aptx-js/token-store-cookie";
 
 const options: CookieTokenStoreOptions = {
   tokenKey: "aptx_token",
@@ -50,11 +50,11 @@ const store = new CookieTokenStore(options);
 
 ## SSR / Node 环境说明
 
-`@aptx/token-store-cookie` 基于 `js-cookie`，属于浏览器实现，不适用于 SSR/Node。
+`@aptx-js/token-store-cookie` 基于 `js-cookie`，属于浏览器实现，不适用于 SSR/Node。
 
 SSR 场景推荐：
 - 每个 SSR request 创建自己的 `TokenStore`（request-scoped），从入站 `Cookie` 读取 token，并通过 `Set-Cookie` 写回响应。
-- 可使用 `@aptx/token-store-ssr-cookie`（本仓库新增）作为 SSR cookie store。
+- 可使用 `@aptx-js/token-store-ssr-cookie`（本仓库新增）作为 SSR cookie store。
 
 ## Implementation Workflow
 
@@ -63,7 +63,7 @@ When integrating cookie token storage:
 1. Create store using `createCookieTokenStore({ tokenKey, metaKey, cookie, syncExpiryFromMeta })`
 2. Keep `syncExpiryFromMeta: true` (default) to auto-sync `meta.expiresAt` → cookie `expires`
 3. Set `syncExpiryFromMeta: false` only if gateway controls cookie expiration independently
-4. Inject store into `@aptx/api-plugin-auth`'s `store` field
+4. Inject store into `@aptx-js/api-plugin-auth`'s `store` field
 5. Test: token/meta I/O, clear, expiry sync, and disabled sync scenarios
 
 ## Documentation

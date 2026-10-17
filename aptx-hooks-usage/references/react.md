@@ -3,7 +3,7 @@
 ## 创建 Hooks
 
 ```typescript
-import { createReactQueryHooks } from '@aptx/api-query-react';
+import { createReactQueryHooks } from '@aptx-js/api-query-react';
 
 // 生成 hooks
 const useAssignmentHooks = createReactQueryHooks(assignmentQueryDef);

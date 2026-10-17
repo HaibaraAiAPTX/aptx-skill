@@ -33,7 +33,7 @@
 - [组合多个扩展点](#组合多个扩展点)
 - [最佳实践](#最佳实践-6)
 
-`@aptx/api-core` 提供了 6 个核心扩展点，可以通过 Plugin 进行替换：
+`@aptx-js/api-core` 提供了 6 个核心扩展点，可以通过 Plugin 进行替换：
 
 | 扩展点 | 接口 | 默认实现 | 用途 |
 |--------|------|----------|------|
@@ -48,7 +48,7 @@
 **接口定义**：
 
 ```ts
-import { Transport, TransportResult, Request, Context } from "@aptx/api-core";
+import { Transport, TransportResult, Request, Context } from "@aptx-js/api-core";
 
 interface Transport {
   send(req: Request, ctx: Context): Promise<TransportResult>;
@@ -71,7 +71,7 @@ interface TransportResult {
 **示例：使用 Axios**
 
 ```ts
-import { Plugin, Registry, Transport, TransportResult, Request, Context } from "@aptx/api-core";
+import { Plugin, Registry, Transport, TransportResult, Request, Context } from "@aptx-js/api-core";
 import axios, { AxiosRequestConfig } from "axios";
 
 const axiosTransportPlugin: Plugin = {
@@ -191,7 +191,7 @@ interface UrlResolver {
 **示例：动态 baseURL**
 
 ```ts
-import { Plugin, Registry, UrlResolver, Request, Context } from "@aptx/api-core";
+import { Plugin, Registry, UrlResolver, Request, Context } from "@aptx-js/api-core";
 
 const dynamicBaseURLPlugin = (getBaseURL: () => string): Plugin => ({
   setup(registry: Registry) {
@@ -236,7 +236,7 @@ import {
   DefaultUrlResolver,
   chainUrlResolvers,
   createGatewayUrlResolver,
-} from "@aptx/api-core";
+} from "@aptx-js/api-core";
 
 const gatewayRoutingPlugin = (fallbackBaseURL: string): Plugin => ({
   setup(registry: Registry) {
@@ -357,7 +357,7 @@ FormData 请求需要 `Content-Type: multipart/form-data; boundary=----XXX` 格�
 **示例：继承 DefaultBodySerializer 扩展**
 
 ```ts
-import { DefaultBodySerializer, Request, Context } from "@aptx/api-core";
+import { DefaultBodySerializer, Request, Context } from "@aptx-js/api-core";
 
 class CustomBodySerializer extends DefaultBodySerializer {
   serialize(req: Request, ctx: Context) {
@@ -383,7 +383,7 @@ const client = new RequestClient({
 **示例：强制删除某个 header**
 
 ```ts
-import { DefaultBodySerializer, BodySerializer, Request, Context } from "@aptx/api-core";
+import { DefaultBodySerializer, BodySerializer, Request, Context } from "@aptx-js/api-core";
 
 const serializer: BodySerializer = {
   serialize(req: Request, ctx: Context) {
@@ -405,7 +405,7 @@ const serializer: BodySerializer = {
 **示例：自定义日期序列化**
 
 ```ts
-import { Plugin, Registry, BodySerializer, Request, Context } from "@aptx/api-core";
+import { Plugin, Registry, BodySerializer, Request, Context } from "@aptx-js/api-core";
 
 const customDateSerializerPlugin: Plugin = {
   setup(registry: Registry) {
@@ -493,7 +493,7 @@ interface ResponseDecoder {
 **示例：BigInt JSON 解析**
 
 ```ts
-import { Plugin, Registry, ResponseDecoder, Response, Request, Context } from "@aptx/api-core";
+import { Plugin, Registry, ResponseDecoder, Response, Request, Context } from "@aptx-js/api-core";
 
 const bigintDecoderPlugin: Plugin = {
   setup(registry: Registry) {
@@ -627,7 +627,7 @@ interface ErrorMapper {
 **示例：业务错误映射**
 
 ```ts
-import { Plugin, Registry, ErrorMapper, HttpError, ConfigError } from "@aptx/api-core";
+import { Plugin, Registry, ErrorMapper, HttpError, ConfigError } from "@aptx-js/api-core";
 
 const businessErrorMapperPlugin: Plugin = {
   setup(registry: Registry) {

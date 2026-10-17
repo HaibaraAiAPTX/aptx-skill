@@ -1,6 +1,6 @@
 # 默认实现
 
-`@aptx/api-core` 提供了以下默认实现，可以通过 RequestClient 构造函数或 Plugin 替换。
+`@aptx-js/api-core` 提供了以下默认实现，可以通过 RequestClient 构造函数或 Plugin 替换。
 
 ## 目录
 - [DefaultUrlResolver](#defaulturlresolver)
@@ -349,7 +349,7 @@ ctx.bag.set(TIMEOUT_BAG_KEY, true);
 ### 自定义错误映射
 
 ```ts
-import { DefaultErrorMapper } from "@aptx/api-core";
+import { DefaultErrorMapper } from "@aptx-js/api-core";
 
 class CustomErrorMapper extends DefaultErrorMapper {
   map(err, req, ctx, transport) {

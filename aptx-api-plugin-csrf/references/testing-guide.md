@@ -6,10 +6,10 @@
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
-import { Context } from "@aptx/api-core";
-import { Request } from "@aptx/api-core";
-import { Response } from "@aptx/api-core";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
+import { Context } from "@aptx-js/api-core";
+import { Request } from "@aptx-js/api-core";
+import { Response } from "@aptx-js/api-core";
 ```
 
 ## 基础测试：添加 header

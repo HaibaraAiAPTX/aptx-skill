@@ -5,7 +5,7 @@
 浏览器环境使用默认实现，无需额外配置：
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 const csrf = createCsrfMiddleware({
   cookieName: "XSRF-TOKEN",
@@ -25,7 +25,7 @@ const csrf = createCsrfMiddleware({
 Node.js 环境需要提供自定义 `getCookie`：
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 // Express 风格的 req/res
 const csrf = createCsrfMiddleware({
@@ -74,7 +74,7 @@ const csrf = createCsrfMiddleware({
 Next.js 使用 `cookies()` API：
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 import { cookies } from 'next/headers';
 
 const csrf = createCsrfMiddleware({
@@ -93,7 +93,7 @@ const csrf = createCsrfMiddleware({
 ```ts
 // app/page.tsx
 import { cookies } from 'next/headers';
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 export default async function Page() {
   const csrf = createCsrfMiddleware({
@@ -112,7 +112,7 @@ export default async function Page() {
 ```ts
 // app/api/handlers/route.ts
 import { cookies } from 'next/headers';
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 export async function POST(req: Request) {
   const csrf = createCsrfMiddleware({
@@ -129,7 +129,7 @@ export async function POST(req: Request) {
 ### Pages Router (getServerSideProps)
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 export async function getServerSideProps(context) {
   const { req } = context;
@@ -153,7 +153,7 @@ export async function getServerSideProps(context) {
 对于使用自定义 cookie 管理的场景：
 
 ```ts
-import { createCsrfMiddleware } from "@aptx/api-plugin-csrf";
+import { createCsrfMiddleware } from "@aptx-js/api-plugin-csrf";
 
 const csrf = createCsrfMiddleware({
   cookieName: "XSRF-TOKEN",
